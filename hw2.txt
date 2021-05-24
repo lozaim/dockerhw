@@ -1,0 +1,30 @@
+Install docker-compose
+Create simple environment with docker-compose
+The environment should include the following services:
+• MySQL
+• Wordpress1
+• Wordpress2
+• Nginx
+• phpMyAdmin
+• Redis*
+
+Service names and images in docker- -
+compose.yml
+pro-mysql (mysql:5.7)
+• pro-wp1 (wordpress:5.7-fpm-alpine)
+• pro-wp2 (wordpress:5.7-fpm-alpine)
+• pro-nginx (nginx:1.15.12-alpine)
+• pro-phpmyadmin (phpMyAdmin:latest)
+• pro-redis (redis:latest)*
+
+Additional requirements
+• MySQL data must be mapped to local directory (./mysql)
+• Wordpress data must be mapped to local directory (./wp1 and ./wp2)
+• Nginx folder with config files must be mapped to local directory (./nginx)
+• The tasks not marked with * are required. You can do the task with * only if
+you done all other tasks. Installing REDIS alone is not enough. You need to
+configure it to be used in two wordpress services. To do this, you may need to
+recreate the standard docker image or create a bash script for deployment.
+• Ultimately, you should have two different wordpress sites (wp1.corp.com and
+wp2.corp.com). These two sites must use the same database. phpMyAdmin
+should be available at db.corp.com
