@@ -1,0 +1,83 @@
+version: '3' 
+services:
+  pro-mysql:
+    image: mysql:5.7
+    container_name: pro-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: "wordpress"
+      MYSQL_ROOT_PASSWORD: "rootpass"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "secret"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - app-network
+      
+  pro-wp1:
+    depends_on:
+      - pro-mysql
+    image: wordpress:5.7-fpm-alpine
+    container_name: pro-wp1
+    restart: unless-stopped
+    environment:
+      - WORDPRESS_DB_HOST=pro-mysql:3306
+      - WORDPRESS_DB_USER=user
+      - WORDPRESS_DB_PASSWORD=secret
+      - WORDPRESS_DB_NAME=wordpress
+      - WORDPRESS_TABLE_PREFIX=wp1
+    working_dir: /var/www/html/wp1.corp.com
+    volumes:
+      - ./wp1:/var/www/html/wp1.corp.com
+    networks:
+      - app-network
+      
+  pro-wp2:
+    depends_on:
+      - pro-mysql
+    image: wordpress:5.7-fpm-alpine
+    container_name: pro-wp2
+    restart: unless-stopped
+    environment:
+      - WORDPRESS_DB_HOST=pro-mysql:3306
+      - WORDPRESS_DB_USER=user
+      - WORDPRESS_DB_PASSWORD=secret
+      - WORDPRESS_DB_NAME=wordpress
+      - WORDPRESS_TABLE_PREFIX=wp2
+    working_dir: /var/www/html/wp2.corp.com    
+    volumes:
+      - ./wp2:/var/www/html/wp2.corp.com 
+    networks:
+      - app-network
+      
+  pro-nginx:
+    depends_on:
+      - pro-wp1
+      - pro-wp2
+    image: nginx:1.15.12-alpine
+    container_name: pro-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./wp1:/var/www/html/wp1.corp.com
+      - ./wp2:/var/www/html/wp2.corp.com
+      - ./nginx:/etc/nginx/conf.d
+    networks:
+      - app-network
+    
+  pro-phpmyadmin:
+    depends_on:
+      - pro-nginx
+      - pro-mysql
+    image: phpmyadmin:latest
+    container_name: pro-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: pro-mysql
+    networks:
+      - app-network    
+
+networks:
+  app-network:
+      driver: bridge

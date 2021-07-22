@@ -1,0 +1,81 @@
+##0
+-Install Docker
+-Create container with mysql
+-Create database and table using docker (cp, exec)
+-Create container with phpMyAdmin
+-Configure communication between mysql and phpMyAdmin containers
+-Check results through web-browser
+
+##1
+
+docker run --rm -d -p 3306:3306 --name mysql0 -e MYSQL_ALLOW_EMPTY_PASSWORD=true -e MYSQL_USER=vmysql -e MYSQL_PASSWORD=supersecret -e MYSQL_DATABASE=my_db mysql/mysql-server:5.7 
+docker cp ./script.sql mysql0:/docker-entrypoint-initdb.d
+docker exec mysql0 mysql -u root -e "source /docker-entrypoint-initdb.d/script.sql"
+docker run --rm -d -p 8089:80 --name phpMyAdmin0 --link mysql0:mysql -e PMA_HOST=mysql0 phpmyadmin/phpmyadmin
+
+
+##2
+
+docker build -t mymysql .
+docker run --rm -d -p 3306:3306 --name mysql0 mymysql
+docker run --rm -d -p 8089:80 --name phpMyAdmin0 --link mysql0:mysql -e PMA_HOST=mysql0 phpmyadmin/phpmyadmin
+
+##3
+docker network create mynet3 
+docker run --rm -d -p 8089:80 --name phpMyAdmin0  --network mynet3 -e PMA_HOST=mysql0 phpmyadmin/phpmyadmin
+docker run --rm -d -p 3306:3306 --name mysql0  --network mynet3  -e MYSQL_ALLOW_EMPTY_PASSWORD=true -e MYSQL_USER=vmysql -e MYSQL_PASSWORD=supersecret -e MYSQL_DATABASE=my_db mysql/mysql-server:5.7
+docker cp ./script.sql mysql0:/docker-entrypoint-initdb.d
+docker exec mysql0 mysql -u root -e "source /docker-entrypoint-initdb.d/script.sql"
+
+
+
+
+
+
+
+
+
+
+docker run -it --rm -d -p 8080:80 --name web nginx
+docker ps -a
+docker cp web:/path /path
+docker cp /path web:/path
+docker inspect web
+
+
+import os
+import sys
+import time
+import logging
+
+print("This is my python script from docker")
+
+key = 'HOME'
+value = os.getenv(key)
+print("Value of 'HOME' environment variable :", value).
+
+key = 'JAVA_HOME'
+value = os.getenv(key)
+print("Value of 'JAVA_HOME' environment variable :", value)
+
+key = 'my_env_from_dockerfile'
+value = os.getenv(key)
+print("Value of 'my_env_from_dockerfile' environment variable :", value)
+
+print('Number of arguments:', len(sys.argv), 'arguments.')
+print('Argument List:', str(sys.argv))
+
+
+with open('testfile.txt') as f:
+    contents = f.read()
+    print(contents)
+
+
+if _name_ == '__main__':
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+    try:
+        while True:
+            time.sleep(1)
+            logging.info("doing something in a loop ...")
+    except KeyboardInterrupt as ex:
+        print('goodbye!')
